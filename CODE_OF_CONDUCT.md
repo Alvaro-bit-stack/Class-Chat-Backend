@@ -13,7 +13,3 @@ Examples of behavior that contributes to a positive environment:
 Examples of unacceptable behavior:
 - Harassment, insults, or derogatory comments
 - Personal or political attacks
-
-## Enforcement
-
-Instances of abusive behavior may be reported by contacting [your-email@example.com](mailto:your-email@example.com).
