@@ -1,6 +1,6 @@
-# StevensSync
+# ClassChat
 
-StevensSync is a Spring Boot application designed for robust data management and secure web services. This repository is ready for public collaboration and open-source contributions.
+ClassChat is a Spring Boot application designed for robust data management and secure web services. This repository is ready for public collaboration and open-source contributions.
 
 ## Features
 
