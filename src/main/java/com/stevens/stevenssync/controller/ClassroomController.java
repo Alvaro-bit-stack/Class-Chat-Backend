@@ -4,11 +4,14 @@ import com.stevens.stevenssync.entities.Classroom;
 import com.stevens.stevenssync.entities.User;
 import com.stevens.stevenssync.repositories.ClassroomRepository;
 import com.stevens.stevenssync.repositories.UserRepository;
+import com.stevens.stevenssync.services.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,14 +21,41 @@ public class ClassroomController {
     private ClassroomRepository classroomRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private S3Service s3Service;
+
 
 
 
     @PostMapping("/api/classrooms")
-    public ResponseEntity<Classroom> createClassroom(@RequestBody Classroom classroom) {
-        classroomRepository.save(classroom);
-        return new ResponseEntity<>(classroom, HttpStatus.CREATED);
+    public ResponseEntity<Classroom> createClassroomWithImage(
+            @RequestParam("courseName") String courseName,
+            @RequestParam("courseCode") String courseCode,
+            @RequestParam("semester") String semester,
+            @RequestParam("instructor") String instructor,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile
+    ) {
+        try {
+            Classroom classroom = new Classroom();
+            classroom.setCourseName(courseName);
+            classroom.setCourseCode(courseCode);
+            classroom.setSemester(semester);
+            classroom.setInstructor(instructor);
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String imageUrl = s3Service.uploadFile(imageFile);
+                classroom.setImageUrl(imageUrl);
+            }
+
+            classroomRepository.save(classroom);
+            return new ResponseEntity<>(classroom, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     @PostMapping("/api/user/{userId}/classrooms")
     public ResponseEntity<String> addUsertoClassroom(@RequestBody Classroom requested_classroom, @PathVariable int userId) {
@@ -74,6 +104,24 @@ public class ClassroomController {
         }
         return new ResponseEntity<>(classroom.get(), HttpStatus.OK);
     }
+    @PutMapping("/api/classroom/{classroomId}")
+    public ResponseEntity<Classroom> addClassroomImage(@PathVariable int classroomId, @RequestParam(value = "image", required = false) MultipartFile imageFile) {
+        try{
+            Optional<Classroom> classroom = classroomRepository.findById(classroomId);
+            if(classroom.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            Classroom cur_classroom = classroom.get();
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String imageUrl = s3Service.uploadFile(imageFile);
+                cur_classroom.setImageUrl(imageUrl);
+            }
+            classroomRepository.save(cur_classroom);
+            return new ResponseEntity<>(cur_classroom, HttpStatus.CREATED);
 
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

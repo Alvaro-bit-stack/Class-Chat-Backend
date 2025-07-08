@@ -24,6 +24,7 @@ public class Classroom {
     private String courseCode;
     private String semester;
     private String instructor;
+    private String imageUrl;
 
 
     @ManyToMany(mappedBy = "classrooms")
