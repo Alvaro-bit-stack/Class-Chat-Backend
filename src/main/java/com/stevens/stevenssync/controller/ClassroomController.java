@@ -43,7 +43,7 @@ public class ClassroomController {
             classroom.setInstructor(instructor);
 
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = s3Service.uploadFile(imageFile);
+                String imageUrl = s3Service.uploadImage(imageFile);
                 classroom.setImageUrl(imageUrl);
             }
 
@@ -113,7 +113,7 @@ public class ClassroomController {
             }
             Classroom cur_classroom = classroom.get();
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = s3Service.uploadFile(imageFile);
+                String imageUrl = s3Service.uploadImage(imageFile);
                 cur_classroom.setImageUrl(imageUrl);
             }
             classroomRepository.save(cur_classroom);
@@ -123,5 +123,29 @@ public class ClassroomController {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    @DeleteMapping ("/api/classroom/{classroomId}")
+    ResponseEntity<HttpStatus> deleteClassroom(@PathVariable int classroomId){
+        try{
+            Optional<Classroom> classroom = classroomRepository.findById(classroomId);
+            if(classroom.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            Classroom cur_classroom = classroom.get();
+            List<User> userList = cur_classroom.getUserList();
+            for (User user : userList) {
+                user.getClassrooms().remove(cur_classroom);
+                userRepository.save(user);
+            }
+            cur_classroom.getUserList().clear();
+            classroomRepository.save(cur_classroom);
+            classroomRepository.delete(cur_classroom);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

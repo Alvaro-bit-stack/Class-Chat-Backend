@@ -23,8 +23,22 @@ public class S3Service {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file) throws Exception {
+    public String uploadImage(MultipartFile file) throws Exception {
         String key = "classroom-images/" + file.getOriginalFilename();
+
+        s3Client.putObject(PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .contentType(file.getContentType())
+                        .build(),
+                RequestBody.fromBytes(file.getBytes())
+        );
+
+        return "https://" + bucketName + ".s3.amazonaws.com/" + key;
+    }
+
+    public String uploadFile(MultipartFile file) throws Exception {
+        String key = "classroom-files/" + file.getOriginalFilename();
 
         s3Client.putObject(PutObjectRequest.builder()
                         .bucket(bucketName)

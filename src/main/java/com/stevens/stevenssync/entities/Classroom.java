@@ -33,4 +33,7 @@ public class Classroom {
 
     @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messageList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> fileList = new ArrayList<>();
 }
