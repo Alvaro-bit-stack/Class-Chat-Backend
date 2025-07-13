@@ -21,7 +21,7 @@ public class S3Controller {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            String imageUrl = s3Service.uploadFile(file);
+            String imageUrl = s3Service.uploadImage(file);
             return ResponseEntity.ok(imageUrl);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());

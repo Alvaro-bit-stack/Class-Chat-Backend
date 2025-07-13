@@ -80,9 +80,14 @@ public class ClassFileController {
         }
         Classroom cur_classroom = classroom.get();
         File file = classroomFileRepository.findById(fileId).get();
-        cur_classroom.getFileList().remove(file);
-        classroomFileRepository.delete(file);
         //also have to delete it from the s3
+        String fileUrl = file.getFileUrl();
+        String bucketName = "classify-class-images";
+        String key = fileUrl.replace("https://" + bucketName + ".s3.amazonaws.com/", "");
+        s3Service.deleteFile(key);
+        cur_classroom.getFileList().remove(file);
+        classroomRepository.save(cur_classroom);
+        classroomFileRepository.delete(file);
         return ResponseEntity.noContent().build();
     }
 
